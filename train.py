@@ -11,7 +11,7 @@ sys.path.append(os.path.join(project_root, 'src'))
 from utils.config import load_yaml
 from utils.seed import set_seed
 from utils.logger import setup_logger
-from datasets.dataset import build_loaders
+from data_loaders.dataset import build_loaders
 from models.factory import create_model
 from engine.losses import get_loss_fn
 from engine.trainer import train_model

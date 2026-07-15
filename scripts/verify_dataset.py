@@ -9,9 +9,9 @@ project_root = os.path.dirname(script_dir)
 sys.path.append(os.path.join(project_root, 'src'))
 
 from utils.config import load_yaml
-from datasets.verify_dataset import verify_dataset
-from datasets.visualize_dataset import generate_dataset_visualizations
-from datasets.dataset import build_loaders
+from data_loaders.verify_dataset import verify_dataset
+from data_loaders.visualize_dataset import generate_dataset_visualizations
+from data_loaders.dataset import build_loaders
 
 def main():
     config_path = os.path.join(project_root, "configs", "models", "cnn_v2.yaml")

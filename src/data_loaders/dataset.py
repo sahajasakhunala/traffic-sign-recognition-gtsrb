@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets
 from PIL import Image
 
-from datasets.transforms import get_train_transforms, get_val_transforms
+from data_loaders.transforms import get_train_transforms, get_val_transforms
 from utils.paths import get_absolute_path
 
 class TransformSubset(Dataset):
