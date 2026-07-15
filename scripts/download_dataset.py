@@ -1,0 +1,31 @@
+import os
+
+def main():
+    print("=" * 60)
+    print("  GTSRB Dataset Download Instructions")
+    print("=" * 60)
+    print("Due to Kaggle authentication requirements and Rub.de bandwidth limits,")
+    print("please download the GTSRB dataset manually via your web browser:")
+    print()
+    print("Option 1 (Official Rub.de Site):")
+    print("  URL: https://benchmark.ini.rub.de/gtsrb_dataset.html")
+    print("  Download file: 'GTSRB_Final_Training_Images.zip' (approx. 263 MB)")
+    print()
+    print("Option 2 (Kaggle - PNG format):")
+    print("  URL: https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign")
+    print("  This version is pre-converted to PNG format, which is easier to work with.")
+    print()
+    print("Instructions:")
+    print("  1. Download the archive (.zip) from one of the links above.")
+    print("  2. Create the raw data directory if it doesn't exist:")
+    print("     'data/raw/' under the project directory.")
+    print("  3. Unzip the downloaded training images folder directly into 'data/raw/'.")
+    print("     The subfolders '00000', '00001', ..., '00042' must be located at:")
+    print("     'C:\\Users\\LENOVO\\OneDrive\\Documents\\traffic-sign-recognition-gtsrb\\data\\raw\\'")
+    print()
+    print("Once complete, run:")
+    print("  python scripts/verify_dataset.py")
+    print("=" * 60)
+
+if __name__ == "__main__":
+    main()
