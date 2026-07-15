@@ -8,7 +8,7 @@ project_root = os.path.dirname(script_dir)
 # Add src to python path
 sys.path.append(os.path.join(project_root, 'src'))
 
-from utils.config import load_config
+from utils.config import load_yaml
 from datasets.verify_dataset import verify_dataset
 from datasets.visualize_dataset import generate_dataset_visualizations
 from datasets.dataset import build_loaders
@@ -19,7 +19,7 @@ def main():
         print(f"[ERROR] Configuration file not found at: {config_path}")
         return
         
-    config = load_config(config_path)
+    config = load_yaml(config_path)
     
     # Check if data directory is configured
     data_raw_dir = config['data']['raw_dir']
