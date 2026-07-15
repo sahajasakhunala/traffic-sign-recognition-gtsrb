@@ -96,3 +96,72 @@ def build_loaders(config: Dict[str, Any]) -> Tuple[DataLoader, DataLoader, int, 
     val_loader = DataLoader(val_set, shuffle=False, **loader_kwargs)
     
     return train_loader, val_loader, num_classes, class_names
+
+
+class GTSRBTestDataset(Dataset):
+    """Dataset for the official GTSRB test set.
+    
+    Reads filenames and class labels from the official GT-final_test.csv.
+    """
+    
+    def __init__(self, csv_file: str, img_dir: str, transform=None) -> None:
+        import pandas as pd
+        self.df = pd.read_csv(csv_file, sep=";")
+        self.img_dir = img_dir
+        self.transform = transform
+
+    def __len__(self) -> int:
+        return len(self.df)
+
+    def __getitem__(self, idx: int) -> Tuple[Any, int]:
+        row = self.df.iloc[idx]
+        img_name = row["Filename"]
+        img_path = os.path.join(self.img_dir, img_name)
+        
+        image = Image.open(img_path).convert("RGB")
+        label = int(row["ClassId"])
+        
+        if self.transform:
+            image = self.transform(image)
+            
+        return image, label
+
+
+def build_test_loader(config: Dict[str, Any]) -> DataLoader:
+    """Creates a dataloader for the official GTSRB test dataset based on config.
+    
+    Args:
+        config: Combined configuration dictionary.
+        
+    Returns:
+        DataLoader: Test dataloader.
+    """
+    data_cfg = config["data"]
+    train_cfg = config["training"]
+    
+    image_size = data_cfg["image_size"]
+    test_transform = get_val_transforms(image_size)
+    
+    # Resolve paths relative to project root
+    csv_path = get_absolute_path(os.path.join(data_cfg["raw_dir"], "GT-final_test.csv"))
+    img_dir = get_absolute_path(os.path.join(os.path.dirname(data_cfg["raw_dir"]), "test"))
+    
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"Official test labels CSV not found at: {csv_path}")
+        
+    if not os.path.exists(img_dir):
+        raise FileNotFoundError(f"Official test images directory not found at: {img_dir}")
+        
+    test_set = GTSRBTestDataset(csv_file=csv_path, img_dir=img_dir, transform=test_transform)
+    
+    test_loader = DataLoader(
+        test_set,
+        batch_size=train_cfg["batch_size"],
+        shuffle=False,
+        num_workers=data_cfg["num_workers"],
+        pin_memory=True,
+        persistent_workers=(data_cfg["num_workers"] > 0)
+    )
+    
+    return test_loader
+

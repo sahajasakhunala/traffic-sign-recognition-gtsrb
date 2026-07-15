@@ -11,7 +11,7 @@
     "data/": false,
     "models/": true,
     "results/": true,
-    "experiments/": true
+    "experiments/": false
   },
   "search.exclude": {
     "data/": true,
