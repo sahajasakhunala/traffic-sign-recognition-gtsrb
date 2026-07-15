@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler, autocast
 from typing import Dict, Any, Optional
 
 from utils.logger import setup_logger
@@ -102,7 +101,7 @@ def train_model(
     ema = EMA(model, decay=ema_decay) if use_ema else None
     
     # AMP setup
-    scaler = GradScaler(enabled=use_amp)
+    scaler = torch.amp.GradScaler(device.type, enabled=use_amp)
     
     # TensorBoard setup (optional)
     tb_writer = None
@@ -130,7 +129,7 @@ def train_model(
             images, labels = images.to(device), labels.to(device)
             
             # Forward pass under autocast (AMP)
-            with autocast(enabled=use_amp):
+            with torch.amp.autocast(device.type, enabled=use_amp):
                 outputs = model(images)
                 loss = criterion(outputs, labels)
                 # Scale loss for gradient accumulation
