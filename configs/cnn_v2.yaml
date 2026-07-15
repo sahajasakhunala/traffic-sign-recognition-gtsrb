@@ -1,0 +1,22 @@
+experiment_name: "exp001_baseline_cnn"
+
+data:
+  raw_dir: "data/raw"
+  val_split: 0.15
+  image_size: 64
+  num_workers: 4
+
+model:
+  name: "cnn_v2"
+  num_classes: 43
+
+training:
+  batch_size: 64
+  epochs: 15
+  lr: 0.001
+  weight_decay: 0.0001
+  early_stopping_patience: 5
+  grad_clip: 2.0
+  label_smoothing: 0.05
+  seed: 42
+  use_amp: false
