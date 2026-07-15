@@ -59,7 +59,7 @@ def main():
                 src_test_images = os.path.join(temp_dir, "Final_Test", "Images")
                 
             if os.path.exists(src_test_images):
-                dest_test_dir = os.path.join(raw_dir, "test")
+                dest_test_dir = os.path.join(project_root, "data", "test")
                 print(f"[INFO] Moving test images to {dest_test_dir} ...")
                 if os.path.exists(dest_test_dir):
                     shutil.rmtree(dest_test_dir)
