@@ -156,6 +156,7 @@ def main():
     # Misclassification JSON
     mis_json_path = os.path.join(results_dir, "misclassified", f"{exp_name}_misclassified.json")
     logger.info(f"Saving misclassified samples list to: {mis_json_path}")
+    os.makedirs(os.path.dirname(mis_json_path), exist_ok=True)
     with open(mis_json_path, "w", encoding="utf-8") as f:
         json.dump(misclassified, f, indent=4)
         
