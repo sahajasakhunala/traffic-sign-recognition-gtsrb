@@ -14,7 +14,7 @@ from datasets.visualize_dataset import generate_dataset_visualizations
 from datasets.dataset import build_loaders
 
 def main():
-    config_path = os.path.join(project_root, "configs", "cnn_v2.yaml")
+    config_path = os.path.join(project_root, "configs", "models", "cnn_v2.yaml")
     if not os.path.exists(config_path):
         print(f"[ERROR] Configuration file not found at: {config_path}")
         return
