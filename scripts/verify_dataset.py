@@ -1,7 +1,5 @@
 import os
 import sys
-import matplotlib.pyplot as plt
-import numpy as np
 
 # Resolve project root (one level up from scripts/)
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +9,8 @@ project_root = os.path.dirname(script_dir)
 sys.path.append(os.path.join(project_root, 'src'))
 
 from utils.config import load_config
-from datasets.integrity import verify_dataset
+from datasets.verify_dataset import verify_dataset
+from datasets.visualize_dataset import generate_dataset_visualizations
 from datasets.dataset import build_loaders
 
 def main():
@@ -37,17 +36,19 @@ def main():
         print("[ERROR] Dataset verification failed. Please download the dataset and place it correctly.")
         return
         
+    # Generate visualization grid
+    visual_output = os.path.join(project_root, "results", "predictions", "dataset_samples.png")
+    print(f"[INFO] Generating sample grid...")
+    generate_dataset_visualizations(
+        data_dir=raw_path,
+        output_path=visual_output,
+        num_samples=8
+    )
+        
     # Build loaders
     print("[INFO] Building PyTorch dataloaders...")
     try:
-        train_loader, val_loader, num_classes, class_names = build_loaders(
-            data_dir=raw_path,
-            image_size=config['data']['image_size'],
-            batch_size=config['training']['batch_size'],
-            val_split=config['data']['val_split'],
-            num_workers=config['data']['num_workers'],
-            seed=config['training']['seed']
-        )
+        train_loader, val_loader, num_classes, class_names = build_loaders(config)
         
         print("[SUCCESS] Dataloaders built successfully!")
         print(f"  Total train batches : {len(train_loader)}")
@@ -58,31 +59,6 @@ def main():
         images, labels = next(iter(train_loader))
         print(f"  Batch images shape  : {images.shape}")
         print(f"  Batch labels shape  : {labels.shape}")
-        
-        # Save sample images
-        print("[INFO] Saving sample images for confirmation...")
-        os.makedirs(os.path.join(project_root, "results"), exist_ok=True)
-        
-        mean = np.array([0.3337, 0.3064, 0.3171])
-        std = np.array([0.2672, 0.2564, 0.2629])
-        
-        fig, axes = plt.subplots(2, 4, figsize=(12, 6))
-        for i, ax in enumerate(axes.flat):
-            if i >= len(images):
-                break
-            img = images[i].permute(1, 2, 0).numpy()
-            img = img * std + mean
-            img = np.clip(img, 0, 1)
-            
-            ax.imshow(img)
-            ax.set_title(f"Class: {labels[i].item()}")
-            ax.axis('off')
-            
-        sample_path = os.path.join(project_root, "results", "sample_batch.png")
-        plt.tight_layout()
-        plt.savefig(sample_path)
-        plt.close()
-        print(f"[SUCCESS] Sample images saved to: {os.path.abspath(sample_path)}")
         
     except Exception as e:
         print(f"[ERROR] Failed to build or test dataloaders: {e}")
