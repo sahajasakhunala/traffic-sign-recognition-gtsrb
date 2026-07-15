@@ -5,6 +5,7 @@ from torchvision import datasets
 from PIL import Image
 
 from datasets.transforms import get_train_transforms, get_val_transforms
+from utils.paths import get_absolute_path
 
 class TransformSubset(Dataset):
     """Wraps a Subset and applies an independent transform — avoids data leakage
@@ -70,7 +71,7 @@ def build_loaders(config: Dict[str, Any]) -> Tuple[DataLoader, DataLoader, int, 
     val_transform = get_val_transforms(image_size)
     
     # Load raw dataset without transform
-    data_dir = data_cfg["raw_dir"]
+    data_dir = get_absolute_path(data_cfg["raw_dir"])
     base_dataset = datasets.ImageFolder(root=data_dir)
     class_names = base_dataset.classes
     num_classes = len(class_names)
