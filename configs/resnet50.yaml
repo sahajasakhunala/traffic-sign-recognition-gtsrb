@@ -1,0 +1,23 @@
+experiment_name: "exp006_resnet50"
+
+data:
+  raw_dir: "data/raw"
+  val_split: 0.15
+  image_size: 128
+  num_workers: 4
+
+model:
+  name: "resnet50"
+  num_classes: 43
+  pretrained: true
+
+training:
+  batch_size: 64
+  epochs: 30
+  lr: 0.0003
+  weight_decay: 0.0002
+  early_stopping_patience: 8
+  grad_clip: 2.0
+  label_smoothing: 0.1
+  seed: 42
+  use_amp: true

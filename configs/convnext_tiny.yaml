@@ -1,0 +1,23 @@
+experiment_name: "exp007_convnext_tiny"
+
+data:
+  raw_dir: "data/raw"
+  val_split: 0.15
+  image_size: 128
+  num_workers: 4
+
+model:
+  name: "convnext_tiny"
+  num_classes: 43
+  pretrained: true
+
+training:
+  batch_size: 64
+  epochs: 35
+  lr: 0.00025
+  weight_decay: 0.0005
+  early_stopping_patience: 8
+  grad_clip: 2.0
+  label_smoothing: 0.1
+  seed: 42
+  use_amp: true
