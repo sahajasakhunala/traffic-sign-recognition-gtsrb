@@ -8,7 +8,7 @@
     "**/Thumbs.db": true,
     "**/__pycache__": true,
     "**/*.pyc": true,
-    "data/": true,
+    "data/": false,
     "models/": true,
     "results/": true,
     "experiments/": true

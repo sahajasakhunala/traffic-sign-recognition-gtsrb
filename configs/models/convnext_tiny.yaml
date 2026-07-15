@@ -21,3 +21,6 @@ training:
   label_smoothing: 0.1
   seed: 42
   use_amp: true
+  use_ema: false
+  optimizer: "adamw"
+  use_tensorboard: false

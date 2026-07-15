@@ -3,7 +3,7 @@ experiment_name: "exp005_efficientnet_b0"
 data:
   raw_dir: "data/raw"
   val_split: 0.15
-  image_size: 128  # EfficientNet benefits from slightly higher resolution
+  image_size: 128
   num_workers: 4
 
 model:
@@ -13,11 +13,14 @@ model:
 
 training:
   batch_size: 64
-  epochs: 30       # Transfer learning might require more epochs for fine-tuning
-  lr: 0.0005       # Lower learning rate for fine-tuning pretrained weights
+  epochs: 30
+  lr: 0.0005
   weight_decay: 0.0002
   early_stopping_patience: 8
   grad_clip: 2.0
   label_smoothing: 0.1
   seed: 42
   use_amp: true
+  use_ema: false
+  optimizer: "adamw"
+  use_tensorboard: false

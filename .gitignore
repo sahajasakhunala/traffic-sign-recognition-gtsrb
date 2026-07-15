@@ -9,10 +9,10 @@ venv/
 .env
 
 # Data and Models
-data/
-models/
-results/
-experiments/
+/data/
+/models/
+/results/
+/experiments/
 
 # IDEs
 .vscode/
