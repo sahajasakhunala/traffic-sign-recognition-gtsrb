@@ -36,13 +36,19 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Use EMA weights from the checkpoint if available."
     )
+    parser.add_argument(
+        "--use_tta",
+        action="store_true",
+        help="Use Test-Time Augmentation (TTA) during evaluation."
+    )
     return parser.parse_args()
 
 @torch.no_grad()
 def evaluate_test_set(
     model: nn.Module,
     dataloader: torch.utils.data.DataLoader,
-    device: torch.device
+    device: torch.device,
+    use_tta: bool = False
 ) -> tuple[float, list[int], list[int], list[dict]]:
     """Evaluates the model on the test loader and tracks misclassified samples."""
     model.eval()
@@ -57,9 +63,28 @@ def evaluate_test_set(
     
     for batch_idx, (images, labels) in enumerate(dataloader):
         images, labels = images.to(device), labels.to(device)
-        outputs = model(images)
         
-        _, predicted = outputs.max(1)
+        if use_tta:
+            import torchvision.transforms.functional as F_t
+            # 5-augmentation TTA: original, rotation +/-3 deg, scale +/-5%
+            outputs1 = model(images)
+            outputs2 = model(F_t.rotate(images, angle=3.0))
+            outputs3 = model(F_t.rotate(images, angle=-3.0))
+            outputs4 = model(F_t.affine(images, angle=0.0, translate=[0, 0], scale=1.05, shear=0.0))
+            outputs5 = model(F_t.affine(images, angle=0.0, translate=[0, 0], scale=0.95, shear=0.0))
+            
+            probs = (
+                torch.softmax(outputs1, dim=1) +
+                torch.softmax(outputs2, dim=1) +
+                torch.softmax(outputs3, dim=1) +
+                torch.softmax(outputs4, dim=1) +
+                torch.softmax(outputs5, dim=1)
+            ) / 5.0
+            _, predicted = probs.max(1)
+        else:
+            outputs = model(images)
+            _, predicted = outputs.max(1)
+            
         correct += predicted.eq(labels).sum().item()
         total += labels.size(0)
         
@@ -137,7 +162,7 @@ def main():
     
     # Evaluate
     logger.info("Running evaluation on test set...")
-    accuracy, y_pred, y_true, misclassified = evaluate_test_set(model, test_loader, device)
+    accuracy, y_pred, y_true, misclassified = evaluate_test_set(model, test_loader, device, use_tta=args.use_tta)
     
     logger.info(f"==================================================")
     logger.info(f"  Official GTSRB Test Accuracy: {accuracy * 100:.2f}%")
