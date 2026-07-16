@@ -2,9 +2,10 @@ import torch.nn as nn
 from typing import Dict, Any
 
 from models.cnn_v2 import CustomCNNV2
-from models.efficientnet import get_efficientnet_b0
+from models.efficientnet import get_efficientnet_b0, get_efficientnet_v2_s
 from models.resnet import get_resnet50
 from models.convnext import get_convnext_tiny
+from models.mobilenet import get_mobilenet_v3_large
 
 def create_model(config: Dict[str, Any]) -> nn.Module:
     """Instantiates a model architecture based on the configuration dictionary.
@@ -34,11 +35,17 @@ def create_model(config: Dict[str, Any]) -> nn.Module:
     elif model_name == "efficientnet_b0":
         return get_efficientnet_b0(num_classes=num_classes, pretrained=pretrained)
         
+    elif model_name == "efficientnet_v2_s":
+        return get_efficientnet_v2_s(num_classes=num_classes, pretrained=pretrained)
+        
     elif model_name == "resnet50":
         return get_resnet50(num_classes=num_classes, pretrained=pretrained)
         
     elif model_name == "convnext_tiny":
         return get_convnext_tiny(num_classes=num_classes, pretrained=pretrained)
+        
+    elif model_name == "mobilenet_v3_large":
+        return get_mobilenet_v3_large(num_classes=num_classes, pretrained=pretrained)
         
     else:
         raise ValueError(f"Unsupported model architecture: {model_name}")
