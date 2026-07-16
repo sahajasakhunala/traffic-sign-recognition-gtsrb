@@ -38,11 +38,18 @@ def main():
     exp_name = config["experiment_name"]
     
     # Setup experiment directory
-    exp_dir = os.path.join(project_root, "experiments", exp_name)
+    drive_mount = "/content/drive/MyDrive"
+    is_colab_drive = os.path.exists(drive_mount)
+    if is_colab_drive:
+        exp_dir = os.path.join(drive_mount, "gtsrb_backups", "experiments", exp_name)
+    else:
+        exp_dir = os.path.join(project_root, "experiments", exp_name)
     os.makedirs(exp_dir, exist_ok=True)
     
     # Initialize logger
     logger = setup_logger("gtsrb", log_file=os.path.join(exp_dir, "train.log"))
+    if is_colab_drive:
+        logger.info(f"[COLAB DETECTED] Google Drive is mounted. Saving experiments directly to Google Drive: {exp_dir}")
     logger.info(f"Loaded config: {args.config}")
     logger.info(f"Experiment directory: {exp_dir}")
     
