@@ -202,6 +202,154 @@ def main():
         with open(os.path.join(exp_dir, "test_misclassified.json"), "w", encoding="utf-8") as f:
             json.dump(misclassified, f, indent=4)
             
+    # --- AUTOMATIC LEADERBOARD CSV & MD GENERATION ---
+    try:
+        import datetime
+        import subprocess
+        import pandas as pd
+        
+        # Calculate parameter count and theoretical deployment size (float32 = 4 bytes)
+        total_params = sum(p.numel() for p in model.parameters())
+        model_size_mb = (total_params * 4) / (1024 * 1024)
+        
+        # Read saved config
+        cfg_used = checkpoint.get("config", {})
+        train_cfg = cfg_used.get("training", {})
+        
+        # Collect runtime duration details
+        t_seconds = checkpoint.get("training_time_seconds", "N/A")
+        t_minutes = checkpoint.get("training_time_minutes", "N/A")
+        
+        # Check training-time regularizations active
+        mixup_active = train_cfg.get("mixup_alpha", 0.0) > 0.0 and train_cfg.get("mixup_prob", 0.0) > 0.0
+        cutmix_active = train_cfg.get("cutmix_alpha", 0.0) > 0.0 and train_cfg.get("cutmix_prob", 0.0) > 0.0
+        
+        # Retrieve Git Commit hash
+        try:
+            git_commit = subprocess.check_output(["git", "-C", project_root, "rev-parse", "--short", "HEAD"]).decode("utf-8").strip()
+        except Exception:
+            git_commit = "N/A"
+            
+        # Retrieve Hardware specifications from checkpoint
+        hw = checkpoint.get("hardware", {})
+        gpu_name = hw.get("gpu", "N/A")
+        cpu_name = hw.get("cpu", "N/A")
+        torch_version = hw.get("torch_version", "N/A")
+        cuda_version = hw.get("cuda_version", "N/A")
+        python_version = hw.get("python_version", "N/A")
+        
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Build CSV leaderboard row representation
+        result_row = {
+            "experiment": exp_name,
+            "model": cfg_used.get("model", {}).get("name", "N/A"),
+            "parameters": f"{total_params / 1e6:.2f}M",
+            "size_mb": f"{model_size_mb:.1f} MB",
+            "image_size": f"{cfg_used.get('data', {}).get('image_size', 'N/A')}x{cfg_used.get('data', {}).get('image_size', 'N/A')}",
+            "epochs": train_cfg.get("epochs", "N/A"),
+            "best_epoch": checkpoint.get("best_epoch", "N/A"),
+            "ema": "✅" if args.use_ema else "❌",
+            "mixup": "✅" if mixup_active else "❌",
+            "cutmix": "✅" if cutmix_active else "❌",
+            "tta": "✅" if args.use_tta else "❌",
+            "optimizer": train_cfg.get("optimizer", "N/A"),
+            "learning_rate": train_cfg.get("lr", "N/A"),
+            "weight_decay": train_cfg.get("weight_decay", "N/A"),
+            "official_accuracy": f"{accuracy * 100:.2f}%",
+            "errors": len(misclassified),
+            "training_time_seconds": f"{t_seconds:.1f}" if isinstance(t_seconds, float) else "N/A",
+            "training_time_minutes": f"{t_minutes:.1f}" if isinstance(t_minutes, float) else "N/A",
+            "checkpoint": os.path.basename(checkpoint_path),
+            "timestamp": timestamp,
+            "git_commit": git_commit,
+            "gpu": gpu_name,
+            "cpu": cpu_name,
+            "torch_version": torch_version,
+            "cuda_version": cuda_version,
+            "python_version": python_version
+        }
+        
+        # Write/Update CSV file
+        csv_path = os.path.join(results_dir, "leaderboard.csv")
+        os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+        
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+        else:
+            df = pd.DataFrame(columns=result_row.keys())
+            
+        # Uniquely identify a run based on experiment, ema activation, and tta active
+        match_mask = (df["experiment"] == exp_name) & (df["ema"] == result_row["ema"]) & (df["tta"] == result_row["tta"])
+        if match_mask.any():
+            # Update row values
+            for col, val in result_row.items():
+                df.loc[match_mask, col] = val
+        else:
+            # Append row values
+            df = pd.concat([df, pd.DataFrame([result_row])], ignore_index=True)
+            
+        df.to_csv(csv_path, index=False)
+        logger.info(f"Leaderboard CSV updated at: {csv_path}")
+        
+        # Sort leaderboard by errors ascending (fewer errors = higher rank)
+        leaderboard_df = df.copy()
+        leaderboard_df["errors"] = pd.to_numeric(leaderboard_df["errors"])
+        leaderboard_df = leaderboard_df.sort_values(by="errors", ascending=True)
+        
+        # Format table for Markdown presentation
+        display_cols = [
+            "experiment", "model", "parameters", "size_mb", "image_size", 
+            "ema", "mixup", "cutmix", "tta", "official_accuracy", "errors", "training_time_minutes"
+        ]
+        
+        col_rename = {
+            "experiment": "Experiment",
+            "model": "Model",
+            "parameters": "Params",
+            "size_mb": "Model Size",
+            "image_size": "Input Size",
+            "ema": "EMA",
+            "mixup": "MixUp",
+            "cutmix": "CutMix",
+            "tta": "TTA",
+            "official_accuracy": "Official Test Acc",
+            "errors": "Errors",
+            "training_time_minutes": "Training Time"
+        }
+        
+        md_df = leaderboard_df[display_cols].rename(columns=col_rename)
+        
+        # Manual dependency-free Markdown table generator
+        cols = list(md_df.columns)
+        header = "| " + " | ".join(cols) + " |"
+        # Center align icons, scores, and sizes
+        separator = "| " + " | ".join([":---:" if c in ["EMA", "MixUp", "CutMix", "TTA", "Official Test Acc", "Errors", "Input Size", "Params", "Model Size"] else "---" for c in cols]) + " |"
+        rows = []
+        for _, r in md_df.iterrows():
+            row_vals = []
+            for c in cols:
+                val = r[c]
+                # Format time string
+                if c == "Training Time" and val != "N/A":
+                    row_vals.append(f"{val} min")
+                else:
+                    row_vals.append(str(val))
+            rows.append("| " + " | ".join(row_vals) + " |")
+            
+        md_table = "\n".join([header, separator] + rows)
+        
+        md_path = os.path.join(results_dir, "leaderboard.md")
+        with open(md_path, "w", encoding="utf-8") as f:
+            f.write("# GTSRB Official Benchmark Leaderboard\n\n")
+            f.write("This table is automatically generated after each evaluation run.\n\n")
+            f.write(md_table)
+            f.write("\n")
+        logger.info(f"Leaderboard Markdown updated at: {md_path}")
+        
+    except Exception as e:
+        logger.warning(f"Failed to update leaderboard files: {str(e)}")
+        
     logger.info("Evaluation pipeline completed successfully!")
 
 if __name__ == "__main__":

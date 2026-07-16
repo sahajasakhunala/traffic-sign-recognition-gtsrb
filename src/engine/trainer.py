@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -91,6 +92,7 @@ def train_model(
     train_cfg = config["training"]
     logger = setup_logger("gtsrb", log_file=os.path.join(exp_dir, "train.log"))
     
+    start_time = time.time()
     epochs = train_cfg["epochs"]
     base_lr = train_cfg["lr"]
     weight_decay = train_cfg.get("weight_decay", 1e-4)
@@ -282,10 +284,53 @@ def train_model(
     if tb_writer:
         tb_writer.close()
         
-    # Save training metrics to JSON
+    # Stop timer and calculate total time
+    end_time = time.time()
+    total_time_seconds = end_time - start_time
+    total_time_minutes = total_time_seconds / 60.0
+    
+    # Collect hardware and platform details
+    import platform
+    torch_version = torch.__version__
+    cuda_version = torch.version.cuda if torch.cuda.is_available() else "N/A"
+    python_version = platform.python_version()
+    cpu_name = platform.processor() or "N/A"
+    gpu_name = "N/A"
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name(0)
+        
+    # Read, update, and rewrite the best checkpoints to include all metadata
+    best_path = os.path.join(exp_dir, "best_model.pth")
+    if os.path.exists(best_path):
+        checkpoint = torch.load(best_path, map_location="cpu")
+        checkpoint["training_time_seconds"] = total_time_seconds
+        checkpoint["training_time_minutes"] = total_time_minutes
+        checkpoint["best_epoch"] = checkpoint.get("epoch", -1)
+        checkpoint["hardware"] = {
+            "gpu": gpu_name,
+            "cpu": cpu_name,
+            "torch_version": torch_version,
+            "cuda_version": cuda_version,
+            "python_version": python_version
+        }
+        
+        # Save updated best checkpoint
+        torch.save(checkpoint, best_path)
+        
+        # Save updated descriptive named checkpoint
+        desc_name = f"{config['model']['name']}_epoch{checkpoint['best_epoch']:02d}_acc{checkpoint['val_acc']*100:.2f}.pth"
+        torch.save(checkpoint, os.path.join(exp_dir, desc_name))
+        
+        # Save updated global checkpoints directory copy
+        global_chk_dir = os.path.abspath(os.path.join(exp_dir, "..", "..", "models", "checkpoints"))
+        if os.path.exists(global_chk_dir):
+            torch.save(checkpoint, os.path.join(global_chk_dir, f"{config['model']['name']}_best.pth"))
+            
+    # Save training metrics history to JSON
     metrics_path = os.path.join(exp_dir, "metrics.json")
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=4)
         
-    logger.info(f"Training completed. Best Validation Accuracy: {best_val_acc * 100:.2f}%")
+    logger.info(f"Training completed in {total_time_minutes:.2f} minutes ({total_time_seconds:.1f} seconds).")
+    logger.info(f"Best Validation Accuracy: {best_val_acc * 100:.2f}%")
     return history

@@ -54,7 +54,7 @@ def main():
     logger.info(f"Experiment directory: {exp_dir}")
     
     # Save the configuration used to the experiment folder for reproducibility
-    with open(os.path.join(exp_dir, "config.yaml"), "w", encoding="utf-8") as f:
+    with open(os.path.join(exp_dir, "config_used.yaml"), "w", encoding="utf-8") as f:
         yaml.dump(config, f, default_flow_style=False)
         
     # Set seed for reproducibility
