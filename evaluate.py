@@ -122,12 +122,13 @@ def main():
             
     checkpoint = torch.load(checkpoint_path, map_location=device)
     
+    # Always load normal weights first to initialize all buffers (including BatchNorm running statistics)
+    logger.info("Loading normal model weights to initialize parameters and buffers...")
+    model.load_state_dict(checkpoint["model_state_dict"])
+    
     if args.use_ema and checkpoint.get("ema_state_dict") is not None:
-        logger.info("Loading EMA weights for evaluation (strict=False)...")
+        logger.info("Overwriting model parameters with EMA weights for evaluation (strict=False)...")
         model.load_state_dict(checkpoint["ema_state_dict"], strict=False)
-    else:
-        logger.info("Loading normal model weights for evaluation...")
-        model.load_state_dict(checkpoint["model_state_dict"])
         
     # Build test loader
     logger.info("Loading official test dataset...")
