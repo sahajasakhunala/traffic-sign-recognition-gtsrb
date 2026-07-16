@@ -95,7 +95,7 @@ def main():
     logger.info("Loading best model checkpoint for full evaluation...")
     best_path = os.path.join(exp_dir, "best_model.pth")
     if os.path.exists(best_path):
-        checkpoint = torch.load(best_path, map_location=device)
+        checkpoint = torch.load(best_path, map_location=device, weights_only=False)
         model.load_state_dict(checkpoint["model_state_dict"])
         
     # Evaluate best model on validation loader

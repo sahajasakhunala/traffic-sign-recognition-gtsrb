@@ -145,7 +145,7 @@ def main():
             logger.error(f"Checkpoint not found at: {checkpoint_path}")
             return
             
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     
     # Always load normal weights first to initialize all buffers (including BatchNorm running statistics)
     logger.info("Loading normal model weights to initialize parameters and buffers...")
