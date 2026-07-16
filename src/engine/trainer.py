@@ -136,6 +136,7 @@ def train_model(
             logger.warning("TensorBoard is not installed. Skipping SummaryWriter initialization.")
             
     best_val_acc = 0.0
+    best_val_loss = float("inf")
     epochs_no_improve = 0
     history = {"train_loss": [], "val_loss": [], "val_acc": [], "lr": []}
     
@@ -244,8 +245,9 @@ def train_model(
         )
         
         # Checkpoint Saving
-        if val_acc > best_val_acc:
+        if val_acc > best_val_acc or (val_acc == best_val_acc and val_loss < best_val_loss):
             best_val_acc = val_acc
+            best_val_loss = val_loss
             epochs_no_improve = 0
             
             # Save checkpoint
@@ -255,6 +257,7 @@ def train_model(
                 "ema_state_dict": ema.shadow if ema else None,
                 "optimizer_state_dict": optimizer.state_dict(),
                 "val_acc": val_acc,
+                "val_loss": val_loss,
                 "config": config
             }
             
