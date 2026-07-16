@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -48,6 +49,25 @@ class EMA:
             if param.requires_grad and name in self.backup:
                 param.data.copy_(self.backup[name])
         self.backup.clear()
+
+
+def rand_bbox(size, lam):
+    """Generates random bounding box coordinates based on lambda."""
+    W = size[2]
+    H = size[3]
+    cut_rat = np.sqrt(1. - lam)
+    cut_w = int(W * cut_rat)
+    cut_h = int(H * cut_rat)
+
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    return bbx1, bby1, bbx2, bby2
 
 
 def train_model(
@@ -128,10 +148,43 @@ def train_model(
         for batch_idx, (images, labels) in enumerate(train_loader):
             images, labels = images.to(device), labels.to(device)
             
+            # Mixup / Cutmix configuration parsing
+            mixup_alpha = train_cfg.get("mixup_alpha", 0.0)
+            cutmix_alpha = train_cfg.get("cutmix_alpha", 0.0)
+            mixup_prob = train_cfg.get("mixup_prob", 0.0)
+            cutmix_prob = train_cfg.get("cutmix_prob", 0.0)
+            
+            is_mixed = False
+            r = np.random.rand()
+            
+            if (mixup_alpha > 0.0 or cutmix_alpha > 0.0) and len(images) > 1:
+                total_prob = mixup_prob + cutmix_prob
+                if r < total_prob:
+                    is_mixed = True
+                    perm = torch.randperm(images.size(0)).to(device)
+                    
+                    if r < mixup_prob:
+                        # Apply Mixup
+                        alpha = mixup_alpha
+                        lam = np.random.beta(alpha, alpha)
+                        images = lam * images + (1.0 - lam) * images[perm]
+                    else:
+                        # Apply Cutmix
+                        alpha = cutmix_alpha
+                        lam = np.random.beta(alpha, alpha)
+                        bbx1, bby1, bbx2, bby2 = rand_bbox(images.size(), lam)
+                        images[:, :, bbx1:bbx2, bby1:bby2] = images[perm, :, bbx1:bbx2, bby1:bby2]
+                        # Adjust lambda to match exact pixel ratio
+                        lam = 1.0 - ((bbx2 - bbx1) * (bby2 - bby1) / (images.size(2) * images.size(3)))
+            
             # Forward pass under autocast (AMP)
             with torch.amp.autocast(device.type, enabled=use_amp):
                 outputs = model(images)
-                loss = criterion(outputs, labels)
+                if is_mixed:
+                    loss = lam * criterion(outputs, labels) + (1.0 - lam) * criterion(outputs, labels[perm])
+                else:
+                    loss = criterion(outputs, labels)
+                    
                 # Scale loss for gradient accumulation
                 loss = loss / grad_accum_steps
                 

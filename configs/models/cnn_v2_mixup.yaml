@@ -1,0 +1,28 @@
+experiment_name: "exp006_cnn_mixup"
+
+data:
+  raw_dir: "data/raw"
+  val_split: 0.15
+  image_size: 64
+  num_workers: 4
+
+model:
+  name: "cnn_v2"
+  num_classes: 43
+
+training:
+  batch_size: 64
+  epochs: 15
+  lr: 0.001
+  weight_decay: 0.0001
+  early_stopping_patience: 5
+  grad_clip: 2.0
+  label_smoothing: 0.05
+  seed: 42
+  use_amp: false
+  use_ema: true
+  ema_decay: 0.999
+  optimizer: "adam"
+  use_tensorboard: false
+  mixup_alpha: 0.2
+  mixup_prob: 0.5
