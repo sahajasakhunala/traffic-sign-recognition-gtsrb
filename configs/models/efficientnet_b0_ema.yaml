@@ -1,4 +1,4 @@
-experiment_name: "exp005_resnet50"
+experiment_name: "exp003_efficientnet_b0_ema"
 
 data:
   raw_dir: "data/raw"
@@ -7,20 +7,21 @@ data:
   num_workers: 4
 
 model:
-  name: "resnet50"
+  name: "efficientnet_b0"
   num_classes: 43
   pretrained: true
 
 training:
   batch_size: 64
   epochs: 30
-  lr: 0.0003
+  lr: 0.0005
   weight_decay: 0.0002
   early_stopping_patience: 8
   grad_clip: 2.0
   label_smoothing: 0.1
   seed: 42
   use_amp: true
-  use_ema: false
+  use_ema: true
+  ema_decay: 0.999
   optimizer: "adamw"
   use_tensorboard: false
