@@ -1,4 +1,4 @@
-experiment_name: "exp005_efficientnet_b0"
+experiment_name: "exp002_efficientnet_b0"
 
 data:
   raw_dir: "data/raw"

@@ -1,4 +1,4 @@
-experiment_name: "exp007_convnext_tiny"
+experiment_name: "exp004_convnext_tiny"
 
 data:
   raw_dir: "data/raw"

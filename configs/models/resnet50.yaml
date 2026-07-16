@@ -1,4 +1,4 @@
-experiment_name: "exp006_resnet50"
+experiment_name: "exp003_resnet50"
 
 data:
   raw_dir: "data/raw"
