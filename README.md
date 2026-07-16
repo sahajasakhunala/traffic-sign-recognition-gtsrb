@@ -13,7 +13,7 @@ A research-grade PyTorch classification and evaluation pipeline on the German Tr
 | **Exp002** | EfficientNet-B0 | ~4.1M | 128x128 | ❌ | **`99.39%`** | **`77`** |
 | **Exp003** | EfficientNet-B0 (Raw) | ~4.1M | 128x128 | ❌ | **`99.39%`** | **`77`** |
 | **Exp003** | EfficientNet-B0 + EMA | ~4.1M | 128x128 | ✅ | **`99.36%`** | **`81`** |
-| **Exp004** | ConvNeXt-Tiny | ~27.8M | 128x128 | *TBD* | *—* | *—* |
+| **Exp004** | ConvNeXt-Tiny | ~27.8M | 128x128 | ❌ | **`99.29%`** | **`90`** |
 | **Exp005** | ResNet50 | ~23.5M | 128x128 | *TBD* | *—* | *—* |
 
 ---
