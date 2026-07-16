@@ -18,6 +18,9 @@ A research-grade PyTorch classification and evaluation pipeline on the German Tr
 | **Exp006** | Custom CNN v2 (MixUp) | ~5.0M | 64x64 | ❌ | **`99.19%`** | **`102`** |
 | **Exp006** | Custom CNN v2 (MixUp + EMA) | ~5.0M | 64x64 | ✅ | **`99.53%`** | **`59`** |
 | **Exp006** | Custom CNN v2 (MixUp + EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.58%`** | **`53`** |
+| **Exp007** | Custom CNN v2 (CutMix) | ~5.0M | 64x64 | ❌ | **`99.14%`** | **`108`** |
+| **Exp007** | Custom CNN v2 (CutMix + EMA) | ~5.0M | 64x64 | ✅ | **`99.21%`** | **`100`** |
+| **Exp007** | Custom CNN v2 (CutMix + EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.21%`** | **`100`** |
 | **Exp009** | Custom CNN v2 (EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.56%`** | **`56`** |
 
 ---
