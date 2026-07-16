@@ -110,11 +110,17 @@ def main():
     model = create_model(config).to(device)
     
     # Load state dict
-    if not os.path.exists(args.checkpoint):
-        logger.error(f"Checkpoint not found at: {args.checkpoint}")
-        return
-        
-    checkpoint = torch.load(args.checkpoint, map_location=device)
+    checkpoint_path = args.checkpoint
+    if not os.path.exists(checkpoint_path):
+        backup_path = os.path.join("/content/drive/MyDrive/gtsrb_backups/experiments", exp_name, os.path.basename(checkpoint_path))
+        if os.path.exists(backup_path):
+            logger.info(f"Checkpoint not found at {checkpoint_path}. Found backup in Google Drive! Loading: {backup_path}")
+            checkpoint_path = backup_path
+        else:
+            logger.error(f"Checkpoint not found at: {checkpoint_path}")
+            return
+            
+    checkpoint = torch.load(checkpoint_path, map_location=device)
     
     if args.use_ema and checkpoint.get("ema_state_dict") is not None:
         logger.info("Loading EMA weights for evaluation...")
