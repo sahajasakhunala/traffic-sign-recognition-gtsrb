@@ -4,28 +4,28 @@ A research-grade PyTorch classification and evaluation pipeline on the German Tr
 
 ---
 
-## 📊 Leaderboard (Official unseen test set - 12,630 images)
+## Leaderboard (Official unseen test set - 12,630 images)
 
 | Experiment | Architecture | Params | Image Size | EMA | Official Test Acc | Errors |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|
-| **Exp001** | Custom CNN v2 | ~5.0M | 64x64 | ✅ | **`99.53%`** | **`59`** |
-| **Exp001** | Custom CNN v2 (Raw) | ~5.0M | 64x64 | ❌ | **`99.46%`** | **`68`** |
-| **Exp002** | EfficientNet-B0 | ~4.1M | 128x128 | ❌ | **`99.39%`** | **`77`** |
-| **Exp003** | EfficientNet-B0 (Raw) | ~4.1M | 128x128 | ❌ | **`99.39%`** | **`77`** |
-| **Exp003** | EfficientNet-B0 + EMA | ~4.1M | 128x128 | ✅ | **`99.36%`** | **`81`** |
-| **Exp004** | ConvNeXt-Tiny | ~27.8M | 128x128 | ❌ | **`99.29%`** | **`90`** |
+| **Exp001** | Custom CNN v2 | ~5.0M | 64x64 | Yes | **`99.53%`** | **`59`** |
+| **Exp001** | Custom CNN v2 (Raw) | ~5.0M | 64x64 | No | **`99.46%`** | **`68`** |
+| **Exp002** | EfficientNet-B0 | ~4.1M | 128x128 | No | **`99.39%`** | **`77`** |
+| **Exp003** | EfficientNet-B0 (Raw) | ~4.1M | 128x128 | No | **`99.39%`** | **`77`** |
+| **Exp003** | EfficientNet-B0 + EMA | ~4.1M | 128x128 | Yes | **`99.36%`** | **`81`** |
+| **Exp004** | ConvNeXt-Tiny | ~27.8M | 128x128 | No | **`99.29%`** | **`90`** |
 | **Exp005** | ResNet50 | ~23.5M | 128x128 | *TBD* | *—* | *—* |
-| **Exp006** | Custom CNN v2 (MixUp) | ~5.0M | 64x64 | ❌ | **`99.19%`** | **`102`** |
-| **Exp006** | Custom CNN v2 (MixUp + EMA) | ~5.0M | 64x64 | ✅ | **`99.53%`** | **`59`** |
-| **Exp006** | Custom CNN v2 (MixUp + EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.58%`** | **`53`** |
-| **Exp007** | Custom CNN v2 (CutMix) | ~5.0M | 64x64 | ❌ | **`99.14%`** | **`108`** |
-| **Exp007** | Custom CNN v2 (CutMix + EMA) | ~5.0M | 64x64 | ✅ | **`99.21%`** | **`100`** |
-| **Exp007** | Custom CNN v2 (CutMix + EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.21%`** | **`100`** |
-| **Exp009** | Custom CNN v2 (EMA) + TTA | ~5.0M | 64x64 | ✅ | **`99.56%`** | **`56`** |
+| **Exp006** | Custom CNN v2 (MixUp) | ~5.0M | 64x64 | No | **`99.19%`** | **`102`** |
+| **Exp006** | Custom CNN v2 (MixUp + EMA) | ~5.0M | 64x64 | Yes | **`99.53%`** | **`59`** |
+| **Exp006** | Custom CNN v2 (MixUp + EMA) + TTA | ~5.0M | 64x64 | Yes | **`99.58%`** | **`53`** |
+| **Exp007** | Custom CNN v2 (CutMix) | ~5.0M | 64x64 | No | **`99.14%`** | **`108`** |
+| **Exp007** | Custom CNN v2 (CutMix + EMA) | ~5.0M | 64x64 | Yes | **`99.21%`** | **`100`** |
+| **Exp007** | Custom CNN v2 (CutMix + EMA) + TTA | ~5.0M | 64x64 | Yes | **`99.21%`** | **`100`** |
+| **Exp009** | Custom CNN v2 (EMA) + TTA | ~5.0M | 64x64 | Yes | **`99.56%`** | **`56`** |
 
 ---
 
-## 🚀 How to Use
+## How to Use
 
 ### 1. Training a model
 Specify the yaml configuration path corresponding to the architecture you wish to optimize:

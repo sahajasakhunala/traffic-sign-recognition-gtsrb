@@ -1,10 +1,10 @@
 experiment,model,parameters,size_mb,image_size,epochs,best_epoch,ema,mixup,cutmix,tta,optimizer,learning_rate,weight_decay,official_accuracy,errors,training_time_seconds,training_time_minutes,checkpoint,timestamp,git_commit,gpu,cpu,torch_version,cuda_version,python_version
-exp005_resnet50,resnet50,23.60M,90.0 MB,128x128,30.0,17.0,❌,❌,❌,❌,adamw,0.0003,0.0002,99.37%,79,3354.3,55.9,best_model.pth,2026-07-20 10:23:52,,Tesla T4,x86_64,2.11.0+cu128,12.8,3.12.13
-exp001_baseline_cnn,Custom CNN v2,5.0M,19.1 MB,,,,✅,,,❌,,,,99.53%,59,,,,,,,,,,
-exp001_baseline_cnn_raw,Custom CNN v2,5.0M,19.1 MB,,,,❌,,,❌,,,,99.46%,68,,,,,,,,,,
-exp002_efficientnet_b0,EfficientNet-B0,4.1M,15.6 MB,,,,❌,,,❌,,,,99.39%,77,,,,,,,,,,
-exp003_efficientnet_b0_ema,EfficientNet-B0,4.1M,15.6 MB,,,,✅,,,❌,,,,99.36%,81,,,,,,,,,,
-exp004_convnext_tiny,ConvNeXt-Tiny,27.8M,106.0 MB,,,,❌,,,❌,,,,99.29%,90,,,,,,,,,,
-exp006_cnn_mixup_tta,Custom CNN v2 (MixUp),5.0M,19.1 MB,,,,✅,,,✅,,,,99.58%,53,,,,,,,,,,
-exp007_cnn_cutmix,Custom CNN v2 (CutMix),5.0M,19.1 MB,,,,✅,,,❌,,,,99.21%,100,,,,,,,,,,
-exp011_resnet50_champion,ResNet50 (Champion),23.6M,90.1 MB,,,,✅,,,✅,,,,99.76%,30,,,,,,,,,,
+exp005_resnet50,resnet50,23.60M,90.0 MB,128x128,30.0,17.0,No,No,No,No,adamw,0.0003,0.0002,99.37%,79,3354.3,55.9,best_model.pth,2026-07-20 10:23:52,,Tesla T4,x86_64,2.11.0+cu128,12.8,3.12.13
+exp001_baseline_cnn,Custom CNN v2,5.0M,19.1 MB,,,,Yes,,,No,,,,99.53%,59,,,,,,,,,,
+exp001_baseline_cnn_raw,Custom CNN v2,5.0M,19.1 MB,,,,No,,,No,,,,99.46%,68,,,,,,,,,,
+exp002_efficientnet_b0,EfficientNet-B0,4.1M,15.6 MB,,,,No,,,No,,,,99.39%,77,,,,,,,,,,
+exp003_efficientnet_b0_ema,EfficientNet-B0,4.1M,15.6 MB,,,,Yes,,,No,,,,99.36%,81,,,,,,,,,,
+exp004_convnext_tiny,ConvNeXt-Tiny,27.8M,106.0 MB,,,,No,,,No,,,,99.29%,90,,,,,,,,,,
+exp006_cnn_mixup_tta,Custom CNN v2 (MixUp),5.0M,19.1 MB,,,,Yes,,,Yes,,,,99.58%,53,,,,,,,,,,
+exp007_cnn_cutmix,Custom CNN v2 (CutMix),5.0M,19.1 MB,,,,Yes,,,No,,,,99.21%,100,,,,,,,,,,
+exp011_resnet50_champion,ResNet50 (Champion),23.6M,90.1 MB,,,,Yes,,,Yes,,,,99.76%,30,,,,,,,,,,

@@ -33,8 +33,8 @@ def main():
             
             # Label
             model_name = row["model"]
-            tta_suffix = " + TTA" if row["tta"] == "✅" else ""
-            ema_suffix = " + EMA" if row["ema"] == "✅" else ""
+            tta_suffix = " + TTA" if str(row["tta"]).lower() == "yes" else ""
+            ema_suffix = " + EMA" if str(row["ema"]).lower() == "yes" else ""
             label = f"{model_name}{ema_suffix}{tta_suffix}"
             
             plot_data.append({
