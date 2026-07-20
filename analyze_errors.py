@@ -82,8 +82,8 @@ def main():
     confusion_pairs = collections.Counter()
     
     for item in misclassified:
-        true_label = int(item["true_label"])
-        pred_label = int(item["predicted_label"])
+        true_label = int(item.get("true_label", item.get("true_class")))
+        pred_label = int(item.get("predicted_label", item.get("predicted_class")))
         
         class_errors[true_label] += 1
         confusion_pairs[(true_label, pred_label)] += 1

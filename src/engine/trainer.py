@@ -139,11 +139,36 @@ def train_model(
     best_val_loss = float("inf")
     epochs_no_improve = 0
     history = {"train_loss": [], "val_loss": [], "val_acc": [], "lr": []}
+    start_epoch = 1
     
+    latest_path = os.path.join(exp_dir, "latest_model.pth")
+    if os.path.exists(latest_path):
+        try:
+            logger.info(f"Found latest checkpoint at: {latest_path}. Resuming training...")
+            checkpoint = torch.load(latest_path, map_location=device, weights_only=False)
+            
+            start_epoch = checkpoint["epoch"] + 1
+            model.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            scaler.load_state_dict(checkpoint["scaler_state_dict"])
+            
+            if ema and checkpoint.get("ema_state_dict") is not None:
+                ema.shadow = {k: v.to(device) for k, v in checkpoint["ema_state_dict"].items()}
+                
+            best_val_acc = checkpoint["val_acc"]
+            best_val_loss = checkpoint["val_loss"]
+            epochs_no_improve = checkpoint.get("epochs_no_improve", 0)
+            history = checkpoint.get("history", history)
+            
+            logger.info(f"Successfully resumed from epoch {checkpoint['epoch']} with best accuracy {best_val_acc*100:.2f}%")
+        except Exception as e:
+            logger.error(f"Error resuming from checkpoint: {e}. Starting from scratch.")
+            
     logger.info(f"Starting training on device: {device}")
     logger.info(f"Optimizing model '{config['model']['name']}' with {optimizer_type} (lr={base_lr})")
     
-    for epoch in range(1, epochs + 1):
+    for epoch in range(start_epoch, epochs + 1):
         model.train()
         running_loss = 0.0
         optimizer.zero_grad()
@@ -279,6 +304,23 @@ def train_model(
         else:
             epochs_no_improve += 1
             
+        # Save latest checkpoint at the end of every epoch for resumption
+        latest_checkpoint = {
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "ema_state_dict": ema.shadow if ema else None,
+            "optimizer_state_dict": optimizer.state_dict(),
+            "scheduler_state_dict": scheduler.state_dict(),
+            "scaler_state_dict": scaler.state_dict(),
+            "val_acc": val_acc,
+            "val_loss": val_loss,
+            "epochs_no_improve": epochs_no_improve,
+            "history": history,
+            "config": config
+        }
+        latest_path = os.path.join(exp_dir, "latest_model.pth")
+        torch.save(latest_checkpoint, latest_path)
+            
         # Early Stopping check
         if epochs_no_improve >= early_stopping_patience:
             logger.info(f"Early stopping triggered after {epoch} epochs (no validation improvement for {early_stopping_patience} epochs).")
@@ -333,6 +375,15 @@ def train_model(
     metrics_path = os.path.join(exp_dir, "metrics.json")
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=4)
+        
+    # Clean up latest_model.pth upon successful completion of training
+    latest_path = os.path.join(exp_dir, "latest_model.pth")
+    if os.path.exists(latest_path):
+        try:
+            os.remove(latest_path)
+            logger.info("Cleaned up temporary resumption checkpoint.")
+        except Exception:
+            pass
         
     logger.info(f"Training completed in {total_time_minutes:.2f} minutes ({total_time_seconds:.1f} seconds).")
     logger.info(f"Best Validation Accuracy: {best_val_acc * 100:.2f}%")
